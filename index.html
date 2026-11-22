@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kitbash Overzicht</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&family=Black+Ops+One&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: werkbank met drie bakken (fases) naast elkaar; cursisten zijn genummerde onderdelen zoals op een gietraam. */
+/* Stijl: snijmat op de werkbank. Bewust één vaste look (donkergroene snijmat, lichte styreen kaarten), in beide thema's gelijk. */
+:root {
+  color-scheme: light;
+  --mat: #33634f;          /* snijmat */
+  --mat-deep: #1d3b2e;
+  --on-mat: #f0eadb;       /* tekst op de mat */
+  --on-mat-muted: #b4c6bb;
+  --bg: #e7e3d8;           /* styreen kaart */
+  --surface: #f6f2e7;      /* papier */
+  --fg: #1b1d1a;           /* inkt */
+  --ink: #1b1d1a;
+  --muted: #565a52;
+  --line: #a9a597;
+  --accent: #f2c230;       /* tape-geel */
+  --tape: #eadfbf;         /* afplaktape */
+  --p1: #a8740f;  --p1-soft: #f3e3bb;   /* bedenken: oker */
+  --p2: #36678a;  --p2-soft: #d5e2ec;   /* samenstellen: primer-blauw */
+  --p3: #c0441b;  --p3-soft: #f6d5c6;   /* afwerken: roest */
+  --hard: 3px 3px 0 #0d1712;
+  --shadow: var(--hard);
+  --f-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body: "Barlow", system-ui, sans-serif;
+  --f-stencil: "Black Ops One", "Barlow Condensed", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.45;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px; background-attachment: fixed;
+}
+body::before { content: ""; position: fixed; inset: 0; background: var(--bg); opacity: .82; pointer-events: none; z-index: -1; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 48px; display: grid; gap: 22px; }
+
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.eyebrow { font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: "Rubik Dirt", var(--f-display); font-weight: 400; font-size: clamp(32px, 5.5vw, 50px); line-height: 1.05; margin: 4px 0 0; letter-spacing: .01em; text-wrap: balance; }
+.btn {
+  font: 600 14px var(--f-body); color: var(--fg); background: var(--surface); border: 1px solid var(--line);
+  border-radius: 6px; padding: 9px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.btn:focus-visible, .card:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn[disabled] { opacity: .5; cursor: default; }
+
+/* Voortgangsstrook */
+.summary { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 10px; }
+.bar { display: flex; height: 14px; border-radius: 3px; overflow: hidden; background: var(--line); }
+.bar span { transition: flex-grow .3s ease; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--muted); }
+.legend b { font-family: var(--f-mono); color: var(--fg); font-variant-numeric: tabular-nums; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+/* Bakken */
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto auto; column-gap: 16px; row-gap: 0; align-items: start; }
+@media (max-width: 820px) { .board { grid-template-columns: 1fr; grid-template-rows: none; row-gap: 16px; } }
+.col { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; display: grid; grid-template-rows: auto 1fr; min-height: 180px; }
+@supports (grid-template-rows: subgrid) { @media (min-width: 821px) { .col { grid-row: span 2; grid-template-rows: subgrid; row-gap: 0; } } }
+.col-head { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.col-head .tag { margin-top: 1px; font: 700 13px var(--f-mono); color: var(--surface); background: var(--c); border-radius: 3px; padding: 2px 7px; }
+.col-head h2 { font: 600 17px var(--f-display); margin: 0; letter-spacing: .02em; }
+.col-head .sub { font-size: 12px; color: var(--muted); }
+.col-head .count { margin-left: auto; font: 600 14px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.list { list-style: none; margin: 0; padding: 12px; display: grid; gap: 10px; align-content: start; min-height: 120px; border-radius: 0 0 8px 8px; transition: background .15s; }
+.list.over { background: var(--soft); }
+.empty-col { font-size: 13px; color: var(--muted); padding: 14px 6px; text-align: center; border: 1px dashed var(--line); border-radius: 6px; }
+
+.card {
+  position: relative; background: var(--bg); border: 1px solid var(--line); border-left: 4px solid var(--c);
+  border-radius: 6px; padding: 10px 12px 10px 12px; box-shadow: var(--shadow); cursor: pointer;
+  display: grid; grid-template-columns: auto minmax(0,1fr); column-gap: 10px; row-gap: 4px;
+}
+.card[draggable="true"] { cursor: grab; }
+.card.dragging { opacity: .4; }
+.part { font: 600 11px var(--f-mono); color: var(--c); border: 1.5px solid var(--c); border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; grid-row: span 2; align-self: start; }
+.name { font-weight: 600; font-size: 15px; overflow-wrap: anywhere; }
+.project { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.note { grid-column: 1 / -1; font-size: 13px; background: var(--soft); border-radius: 4px; padding: 6px 8px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.meta { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 2px; }
+.age { font: 400 11px var(--f-mono); color: var(--muted); }
+.age.stale { color: var(--p3); font-weight: 600; }
+.moves { display: flex; gap: 4px; }
+.mv { font: 600 13px var(--f-mono); width: 30px; height: 28px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.mv:hover:not([disabled]) { border-color: var(--c); color: var(--c); }
+.mv[disabled] { opacity: .3; cursor: default; }
+
+.p1 { --c: var(--p1); --soft: var(--p1-soft); }
+.p2 { --c: var(--p2); --soft: var(--p2-soft); }
+.p3 { --c: var(--p3); --soft: var(--p3-soft); }
+
+.status { font-size: 13px; color: var(--muted); }
+.status.err { color: var(--p3); }
+
+/* Bewerken */
+dialog { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--fg); padding: 0; width: min(440px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(10,15,10,.45); }
+dialog form { padding: 20px; display: grid; gap: 14px; }
+dialog h3 { margin: 0; font: 600 20px var(--f-display); }
+label { display: grid; gap: 5px; font-size: 12px; font-family: var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+input, textarea, select { font: 400 15px var(--f-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px; width: 100%; text-transform: none; letter-spacing: 0; }
+textarea { min-height: 80px; resize: vertical; }
+.phase-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.phase-pick label { text-transform: none; letter-spacing: 0; font: 500 13px var(--f-body); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.phase-pick input { width: auto; margin: 0; accent-color: var(--c); }
+.phase-pick label:has(input:checked) { border-color: var(--c); background: var(--soft); }
+.actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.actions .right { display: flex; gap: 8px; }
+.btn.danger { color: var(--p3); }
+.btn.danger.armed { background: var(--p3); color: var(--surface); border-color: var(--p3); }
+
+/* Foto's: versie 1-3 */
+.shots { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.shot { position: relative; display: block; padding: 0; border: 0; border-radius: 4px; overflow: hidden; aspect-ratio: 1 / 1; max-width: 100%; background: var(--soft); cursor: zoom-in; }
+.shot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.shot .v { position: absolute; left: 4px; top: 4px; font: 600 10px var(--f-mono); letter-spacing: .04em; color: var(--surface); background: var(--c); border-radius: 3px; padding: 1px 5px; }
+.shot.empty { cursor: default; background: transparent; border: 1px dashed var(--line); display: grid; place-items: center; font: 400 11px var(--f-mono); color: var(--muted); }
+.shot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#viewer { width: min(900px, calc(100vw - 32px)); background: var(--surface); }
+#viewer .vbody { display: grid; gap: 10px; padding: 12px; }
+#viewer img { width: 100%; max-height: 75vh; object-fit: contain; border-radius: 4px; background: var(--bg); }
+#viewer .vcap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 12px; font-size: 14px; }
+#viewer .vnav { display: flex; gap: 6px; }
+.foto-field { display: grid; gap: 8px; }
+.foto-prev { width: 100%; aspect-ratio: 4 / 3; max-width: 100%; border: 1px dashed var(--line); border-radius: 6px; background: var(--bg); display: grid; place-items: center; overflow: hidden; color: var(--muted); font-size: 13px; text-align: center; padding: 8px; }
+.foto-prev img { width: 100%; height: 100%; object-fit: cover; }
+.foto-prev:has(img) { padding: 0; border-style: solid; }
+.foto-btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.foto-btns input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.foto-hint { font-size: 12px; color: var(--muted); }
+.foto-hint.err { color: var(--p3); }
+.slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.slot { position: relative; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.slot-t { font: 600 11px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.slot-prev { aspect-ratio: 1 / 1; max-width: 100%; border: 1px dashed var(--line); border-radius: 6px; background: var(--bg); display: grid; place-items: center; overflow: hidden; color: var(--muted); font-size: 12px; text-align: center; }
+.slot-prev img { width: 100%; height: 100%; object-fit: cover; }
+.slot-prev:has(img) { border-style: solid; }
+.slot .btn.sm, .slot label.btn.sm { display: inline-flex; justify-content: center; padding: 6px 6px; font: 600 13px var(--f-body); text-transform: none; letter-spacing: 0; color: var(--fg); }
+.slot .btn.sm.danger { color: var(--p3); }
+.slot input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Fase-tabs: alleen op de telefoon */
+.tabs { display: none; }
+@media (max-width: 820px) {
+  .tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; padding-block: 8px; margin-block: -8px; background: var(--bg); }
+  .tab { font: 600 13px var(--f-body); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-bottom: 3px solid var(--line); border-radius: 6px; padding: 8px 4px; min-height: 44px; display: grid; justify-items: center; gap: 1px; cursor: pointer; }
+  .tab .tn { font: 700 11px var(--f-mono); color: var(--muted); letter-spacing: .04em; }
+  .tab .tc { font: 600 12px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tab[aria-selected="true"] { background: var(--soft); border-color: var(--c); border-bottom-color: var(--c); }
+  .tab[aria-selected="true"] .tn, .tab[aria-selected="true"] .tc { color: var(--c); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .col.off { display: none; }
+}
+/* ===== Stijl: stoer · kitbash · knutsel ===== */
+body {
+  background-color: var(--mat); color: var(--on-mat); font-family: var(--f-body);
+  background-image:
+    linear-gradient(rgba(255,255,255,.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.10) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+}
+body::before { display: none; }
+
+/* Kop met liniaal eronder */
+header { padding-bottom: 22px; background:
+  repeating-linear-gradient(90deg, rgba(240,234,219,.75) 0 2px, transparent 2px 50px) left bottom / 100% 14px no-repeat,
+  repeating-linear-gradient(90deg, rgba(240,234,219,.45) 0 1px, transparent 1px 10px) left bottom / 100% 7px no-repeat,
+  linear-gradient(rgba(240,234,219,.75), rgba(240,234,219,.75)) left bottom / 100% 2px no-repeat; }
+h1 { color: var(--on-mat); text-shadow: 3px 3px 0 var(--mat-deep); letter-spacing: .02em; }
+.stand { font: 600 12px var(--f-mono); color: var(--ink); background: var(--tape); padding: 4px 12px; transform: rotate(1.5deg); box-shadow: 2px 2px 0 rgba(0,0,0,.35);
+  clip-path: polygon(0 8%, 3% 0, 97% 4%, 100% 0, 99% 92%, 100% 100%, 2% 96%, 0 100%); }
+.status { color: var(--on-mat-muted); }
+.status.err { color: #ffa27e; }
+
+/* Knoppen: dik omlijnd, harde schaduw, indrukken bij klikken */
+.btn { font: 700 15px var(--f-display); text-transform: uppercase; letter-spacing: .04em; color: var(--ink); background: var(--surface);
+  border: 2px solid var(--ink); border-radius: 4px; padding: 8px 14px; box-shadow: var(--hard); transition: transform .08s, box-shadow .08s; }
+.btn:hover { border-color: var(--ink); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #0d1712; }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #0d1712; }
+.btn.primary { background: var(--accent); border-color: var(--ink); color: var(--ink); }
+.btn.danger { color: var(--p3); }
+.btn.danger.armed { background: var(--p3); color: #fff; border-color: var(--ink); }
+.btn[disabled] { box-shadow: none; transform: none; }
+:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px !important; }
+dialog :focus-visible { outline-color: var(--ink) !important; }
+
+/* Voortgangsstrook */
+.summary { color: var(--fg); background: var(--surface); border: 2px solid var(--ink); border-radius: 4px; box-shadow: var(--hard); }
+.bar { height: 16px; border: 2px solid var(--ink); border-radius: 2px;
+  background: repeating-linear-gradient(-45deg, #d8d3c4 0 6px, #ece8dc 6px 12px); }
+.legend { color: var(--muted); font-weight: 500; }
+.legend b { color: var(--ink); }
+.dot { border: 1.5px solid var(--ink); border-radius: 1px; }
+
+/* Kolommen: bakjes op de snijmat, met snijlijn */
+.col { background: rgba(9,18,13,.38); border: 2px dashed rgba(240,234,219,.38); border-radius: 6px; }
+.col-head { color: var(--on-mat); border-bottom: 2px dashed rgba(240,234,219,.38); padding: 14px 14px 12px; }
+.col-head h2 { font: 700 21px/1.1 var(--f-display); text-transform: uppercase; letter-spacing: .03em; color: var(--on-mat); }
+.col-head .sub { color: var(--on-mat-muted); font-size: 13px; margin-top: 2px; }
+.col-head .count { color: var(--on-mat); font-size: 16px; }
+.col-head .tag { font: 400 16px/1 var(--f-stencil); color: #fff; background: var(--c); border-radius: 0; padding: 5px 9px 4px; margin-top: 0;
+  transform: rotate(-4deg); box-shadow: 2px 2px 0 #0d1712; clip-path: polygon(0 4%, 6% 0, 94% 6%, 100% 0, 97% 50%, 100% 100%, 5% 95%, 0 100%, 3% 50%); }
+.list.over { background: rgba(240,234,219,.10); }
+.empty-col { color: var(--on-mat-muted); border: 2px dashed rgba(240,234,219,.25); border-radius: 4px; }
+
+/* Kaarten: onderdeel aan een gietraam */
+.card { color: var(--fg); background: var(--bg); border: 2px solid var(--ink); border-left: 8px solid var(--c); border-radius: 4px; box-shadow: var(--hard); }
+.card[draggable="true"]:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #0d1712; }
+.part { position: relative; font: 600 11px var(--f-mono); color: var(--ink); background: var(--soft); border: 2px solid var(--c); width: 32px; height: 32px; }
+.part::before { content: ""; position: absolute; right: 100%; top: 50%; width: 12px; height: 4px; background: var(--c); transform: translateY(-50%); }
+.name { font: 700 17px/1.2 var(--f-display); letter-spacing: .02em; }
+.project { color: var(--muted); font-size: 14px; }
+.note { background: var(--soft); border-radius: 2px; border-left: 3px solid var(--c); font-size: 14px; }
+.age { color: var(--muted); }
+.age.stale { color: var(--p3); }
+.mv { border: 2px solid var(--ink); border-radius: 3px; background: var(--surface); color: var(--ink); box-shadow: 2px 2px 0 #0d1712; }
+.mv:hover:not([disabled]) { background: var(--c); color: #fff; border-color: var(--ink); }
+.mv:active:not([disabled]) { transform: translate(2px, 2px); box-shadow: none; }
+.mv[disabled] { box-shadow: none; }
+
+/* Foto's */
+.shot { border: 2px solid var(--ink); border-radius: 3px; }
+.shot .v { color: #fff; background: var(--ink); border-radius: 2px; }
+.shot.empty { border: 2px dashed var(--line); color: var(--muted); }
+
+/* Vensters met waarschuwingsstreep */
+dialog { color: var(--fg); background: var(--surface); border: 3px solid var(--ink); border-radius: 6px; box-shadow: 6px 6px 0 #0d1712; }
+dialog::backdrop { background: rgba(8,16,12,.6); }
+dialog form, #viewer .vbody { background: repeating-linear-gradient(-45deg, var(--accent) 0 10px, var(--ink) 10px 20px) top / 100% 8px no-repeat; }
+dialog form { padding-top: 26px; }
+#viewer .vbody { padding-top: 20px; }
+dialog h3 { font: 700 26px/1.1 var(--f-display); text-transform: uppercase; letter-spacing: .03em; }
+input, textarea, select { background: #fffdf6; border: 2px solid var(--ink); border-radius: 4px; }
+.phase-pick label { border: 2px solid var(--ink); border-radius: 4px; font-weight: 600; }
+.phase-pick label:has(input:checked) { background: var(--soft); border-color: var(--c); box-shadow: 2px 2px 0 var(--c); }
+.slot-prev { border: 2px dashed var(--line); border-radius: 4px; }
+.slot-prev:has(img) { border: 2px solid var(--ink); }
+.slot .btn.sm, .slot label.btn.sm { font: 700 14px var(--f-display); text-transform: uppercase; letter-spacing: .03em; color: var(--ink); box-shadow: 2px 2px 0 #0d1712; }
+.slot .btn.sm.danger { color: var(--p3); }
+#viewer .vcap { font-weight: 600; }
+#viewer img { border: 2px solid var(--ink); }
+
+/* Fase-tabs (telefoon) */
+@media (max-width: 820px) {
+  .tabs { background: var(--mat); }
+  .tab { color: var(--ink); background: var(--surface); border: 2px solid var(--ink); border-bottom-width: 2px; border-radius: 4px; box-shadow: var(--hard); font: 700 15px var(--f-display); text-transform: uppercase; letter-spacing: .03em; }
+  .tab .tn { font: 400 12px var(--f-stencil); color: var(--c); letter-spacing: .06em; }
+  .tab .tc { color: var(--muted); text-transform: none; letter-spacing: 0; }
+  .tab[aria-selected="true"] { background: var(--c); border-color: var(--ink); border-bottom-color: var(--ink); color: #fff; transform: translate(2px, 2px); box-shadow: 1px 1px 0 #0d1712; }
+  .tab[aria-selected="true"] .tn, .tab[aria-selected="true"] .tc { color: #fff; }
+  .wrap { padding-inline: 16px; }
+}
+/* Passend houden op smalle schermen */
+.slot > * { min-width: 0; max-width: 100%; }
+.slot .btn.sm, .slot label.btn.sm { font-size: 12px; letter-spacing: 0; padding: 5px 4px; white-space: normal; text-align: center; }
+@media (max-width: 820px) {
+  .tab { font-size: 13px; letter-spacing: 0; min-width: 0; padding-inline: 2px; }
+  .tab > span { max-width: 100%; overflow-wrap: anywhere; }
+}
+@media (prefers-reduced-motion: reduce) { .btn, .mv, .card, .tab { transition: none !important; } .btn:hover, .card[draggable="true"]:hover { transform: none; } }
+/* Logo in de kop */
+.brand { display: grid; gap: 10px; justify-items: start; min-width: 0; }
+.logo { display: block; height: 46px; width: auto; max-width: 100%; }
+.header-side { display: grid; gap: 12px; justify-items: end; }
+@media (max-width: 820px) {
+  .logo { height: 36px; }
+  header { align-items: stretch; }
+  .header-side { width: 100%; justify-items: start; }
+}
+
+/* Bewerkbare Netlify-versie */
+body { margin: 0; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+.header-btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.alleen-lezen .card { cursor: default; }
+.code-uitleg { margin: 0; font-size: 14px; color: var(--muted); max-width: 46ch; }
+#codeDlg { width: min(400px, calc(100vw - 32px)); }
+@media (max-width: 820px) {
+  .header-btns { display: grid; grid-template-columns: 1fr; width: 100%; }
+  .header-btns .btn { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <img class="logo" src="data:image/png;base64,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" alt="Hanze" width="1001" height="324">
+      <h1>Kitbash Overzicht</h1>
+    </div>
+    <div class="header-side">
+      <div class="header-btns">
+        <button class="btn primary" id="addBtn" type="button">+ Cursist toevoegen</button>
+      </div>
+      <div class="stand" id="stand">Laden…</div>
+    </div>
+  </header>
+
+  <section class="summary" aria-label="Verdeling over de fases">
+    <div class="bar" id="bar"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <div class="status" id="status" role="status" hidden></div>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Kies een fase"></nav>
+
+  <main class="board" id="board"></main>
+</div>
+
+<dialog id="dlg">
+  <form id="form" method="dialog">
+    <h3 id="dlgTitle">Cursist bewerken</h3>
+    <label>Naam <input id="fName" required maxlength="60" autocomplete="off"></label>
+    <label>Project / model <input id="fProject" maxlength="90" placeholder="bijv. mech uit tankonderdelen" autocomplete="off"></label>
+    <div style="display:grid;gap:5px">
+      <span class="eyebrow">Fase</span>
+      <div class="phase-pick" id="fPhase"></div>
+    </div>
+    <div class="foto-field">
+      <span class="eyebrow">Foto's van het project</span>
+      <div class="slots" id="fSlots"></div>
+      <span class="foto-hint" id="fFotoHint">Voeg per stap een foto toe: versie 1, 2 en 3.</span>
+    </div>
+    <label>Notitie <textarea id="fNote" maxlength="400" placeholder="Wat speelt er, waar loop je tegenaan?"></textarea></label>
+    <div class="actions">
+      <button class="btn danger" type="button" id="delBtn">Cursist verwijderen</button>
+      <div class="right">
+        <button class="btn" type="button" id="cancelBtn">Annuleren</button>
+        <button class="btn primary" type="submit" id="saveBtn">Opslaan</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="codeDlg">
+  <form id="codeForm" method="dialog">
+    <h3>Klascode</h3>
+    <p class="code-uitleg">Om iets op te slaan heb je de klascode nodig. Die krijg je van je docent. Je hoeft hem op dit apparaat maar één keer in te vullen.</p>
+    <label>Klascode <input id="fCode" autocomplete="off" autocapitalize="off" spellcheck="false" required></label>
+    <span class="foto-hint err" id="codeErr" hidden></span>
+    <div class="actions">
+      <span></span>
+      <div class="right">
+        <button class="btn" type="button" id="codeCancel">Annuleren</button>
+        <button class="btn primary" type="submit" id="codeOk">Doorgaan</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="viewer">
+  <div class="vbody">
+    <img id="vImg" alt="">
+    <div class="vcap"><span id="vCap"></span><span class="vnav"><button class="btn" type="button" id="vPrev" aria-label="Vorige versie">←</button><button class="btn" type="button" id="vNext" aria-label="Volgende versie">→</button><button class="btn" type="button" id="vClose">Sluiten</button></span></div>
+  </div>
+</dialog>
+
+<script>
+/* ============================================================
+   INSTELLINGEN: vul hier je Supabase-gegevens in
+   (Supabase → Project Settings → API / Data API)
+   ============================================================ */
+const SUPABASE_URL = "https://wuvchsuzjhaibltzmafr.supabase.co";   // bijv. "https://abcdefghijkl.supabase.co"
+const SUPABASE_KEY = "sb_publishable_-inNZFFg9-BS3vWK5ohf-g_s0jnyibm";   // de publieke "anon" / "publishable" sleutel
+/* ============================================================ */
+
+/* Reserve: deze stand wordt getoond als de online opslag niet bereikbaar is. */
+const STAND = "2026-10-30";
+const RESERVE = [
+  { nummer: 1, naam: "Cursist 1", project: "", fase: "samenstellen", notitie: "", foto1: "", foto2: "", foto3: "", bijgewerkt: "2026-10-20" },
+  { nummer: 2, naam: "Cursist 2", project: "", fase: "samenstellen", notitie: "", foto1: "", foto2: "", foto3: "", bijgewerkt: "2026-10-15" },
+  { nummer: 3, naam: "Cursist 3", project: "", fase: "samenstellen", notitie: "", foto1: "", foto2: "", foto3: "", bijgewerkt: "2026-10-29" },
+  { nummer: 4, naam: "Cursist 4", project: "", fase: "samenstellen", notitie: "", foto1: "", foto2: "", foto3: "", bijgewerkt: "2026-10-29" },
+  { nummer: 5, naam: "Cursist 5", project: "", fase: "samenstellen", notitie: "", foto1: "", foto2: "", foto3: "", bijgewerkt: "2026-10-29" },
+  { nummer: 6, naam: "Cursist 6", project: "", fase: "afwerken", notitie: "", foto1: "", foto2: "", foto3: "", bijgewerkt: "2026-10-20" },
+  { nummer: 7, naam: "Cursist 7", project: "", fase: "samenstellen", notitie: "", foto1: "", foto2: "", foto3: "", bijgewerkt: "2026-10-20" },
+  { nummer: 8, naam: "Obbert", project: "Ruiter te paard", fase: "bedenken", notitie: "Vormgeven benen van de figuur bij een bestaand paard", foto1: "afbeeldingen/fotos/08-obbert-v1.jpg", foto2: "afbeeldingen/fotos/08-obbert-v2.jpg", foto3: "afbeeldingen/fotos/08-obbert-v3.jpg", bijgewerkt: "2026-10-21" },
+];
+
+(function () {
+  const PHASES = [
+    { id: "bedenken", code: "1", short: "Bedenken", title: "Bedenken / verzamelen", sub: "idee, referenties, onderdelen verzamelen", cls: "p1" },
+    { id: "samenstellen", code: "2", short: "Samenstellen", title: "Samenstellen & in elkaar zetten", sub: "passen, zagen, lijmen, vullen, schuren", cls: "p2" },
+    { id: "afwerken", code: "3", short: "Afwerken", title: "Afwerken & schilderen", sub: "primer, verf, weathering, decals", cls: "p3" },
+  ];
+  const VERSIES = [1, 2, 3];
+  const MAANDEN = ["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+  const $ = id => document.getElementById(id);
+  const faseVan = r => PHASES.some(p => p.id === r.fase) ? r.fase : "bedenken";
+  const idx = id => Math.max(0, PHASES.findIndex(p => p.id === id));
+  const fmtDag = s => { const d = new Date(s); return isNaN(d) ? "" : d.getDate() + " " + MAANDEN[d.getMonth()] + " " + d.getFullYear(); };
+  const tijd = d => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  const opslag = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} },
+  };
+
+  let rows = [];
+  let live = false;        // true = gegevens komen uit Supabase en kunnen worden bewerkt
+  let editing = null;
+  const pending = {};      // per versie: undefined = ongewijzigd, "" = verwijderen, data-URL = nieuw
+
+  function setStatus(t, err) { const s = $("status"); s.textContent = t || ""; s.hidden = !t; s.classList.toggle("err", !!err); }
+  let statusTimer = 0;
+  function flash(t) { setStatus(t); clearTimeout(statusTimer); statusTimer = setTimeout(() => setStatus(""), 2500); }
+
+  /* ---------- Supabase ---------- */
+  const geconfigureerd = () => /^https:\/\//.test(SUPABASE_URL) && SUPABASE_KEY.length > 20;
+  async function api(pad, opts = {}) {
+    const res = await fetch(SUPABASE_URL.replace(/\/$/, "") + pad, Object.assign({}, opts, {
+      // Oude "anon"-sleutels (eyJ…) gaan ook mee als Bearer; nieuwe "sb_publishable_"-sleutels alleen als apikey.
+      headers: Object.assign({ apikey: SUPABASE_KEY }, /^eyJ/.test(SUPABASE_KEY) ? { Authorization: "Bearer " + SUPABASE_KEY } : {}, opts.headers || {}),
+    }));
+    const tekst = await res.text();
+    let data = null; try { data = tekst ? JSON.parse(tekst) : null; } catch (e) { data = tekst; }
+    if (!res.ok) {
+      const msg = (data && (data.message || data.error || data.msg)) || ("HTTP " + res.status);
+      const err = new Error(msg); err.status = res.status;
+      if (/klascode onjuist/i.test(msg)) err.badcode = true;
+      throw err;
+    }
+    return data;
+  }
+  const rpc = (naam, args) => api("/rest/v1/rpc/" + naam, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(args) });
+
+  async function laden(stil) {
+    if (!geconfigureerd()) return reserve("De online opslag is nog niet ingesteld. Je ziet de stand van " + fmtDag(STAND) + "; wijzigen kan nog niet.");
+    try {
+      const data = await api("/rest/v1/cursisten?select=*&order=nummer.asc");
+      rows = Array.isArray(data) ? data : [];
+      live = true;
+      $("stand").textContent = "Live · bijgewerkt " + tijd(new Date());
+      render();
+      if (!stil) setStatus(rows.length ? "" : "Nog geen cursisten. Voeg de eerste toe met de knop bovenaan.");
+    } catch (e) {
+      if (live && stil) return;   // een gemiste verversing: houd wat er staat
+      reserve("Geen verbinding met de online opslag. Je ziet de stand van " + fmtDag(STAND) + "; wijzigen kan nu niet.");
+    }
+  }
+  function reserve(melding) {
+    live = false;
+    rows = RESERVE.map((r, i) => Object.assign({ id: "reserve-" + i }, r));
+    $("stand").textContent = "Stand van " + fmtDag(STAND);
+    render(); setStatus(melding, true);
+  }
+  // Verversen: bij terugkeren naar het tabblad en elke minuut
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && !iemandBewerkt()) laden(true); });
+  setInterval(() => { if (document.visibilityState === "visible" && !iemandBewerkt()) laden(true); }, 60000);
+  const iemandBewerkt = () => $("dlg").open || $("codeDlg").open;
+
+  /* ---------- Klascode ---------- */
+  const CODE_KEY = "kitbash-klascode";
+  let codeResolve = null;
+  function vraagCode(fout) {
+    return new Promise(resolve => {
+      codeResolve = resolve;
+      $("fCode").value = ""; $("codeErr").hidden = !fout; $("codeErr").textContent = fout || "";
+      $("codeOk").disabled = false; $("codeDlg").showModal(); $("fCode").focus();
+    });
+  }
+  $("codeForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const code = $("fCode").value.trim(); if (!code) return;
+    $("codeOk").disabled = true; $("codeErr").hidden = true;
+    try {
+      const ok = await rpc("controleer_code", { p_code: code });
+      if (ok === true) { opslag.set(CODE_KEY, code); $("codeDlg").close(); const r = codeResolve; codeResolve = null; r && r(code); return; }
+      $("codeErr").textContent = "Deze klascode klopt niet. Controleer hem en probeer het opnieuw.";
+    } catch (err) {
+      $("codeErr").textContent = "Controleren lukte niet. Controleer je internetverbinding en probeer het opnieuw.";
+    }
+    $("codeErr").hidden = false; $("codeOk").disabled = false; $("fCode").select();
+  });
+  function codeAfbreken() { $("codeDlg").close(); const r = codeResolve; codeResolve = null; r && r(null); }
+  $("codeCancel").addEventListener("click", codeAfbreken);
+  $("codeDlg").addEventListener("cancel", e => { e.preventDefault(); codeAfbreken(); });
+  async function klascode() { return opslag.get(CODE_KEY) || await vraagCode(); }
+
+  // Voert een schrijfactie uit met de klascode; vraagt opnieuw als de code niet (meer) klopt.
+  async function metCode(actie) {
+    let code = await klascode(); if (!code) return { afgebroken: true };
+    try { return { data: await actie(code) }; }
+    catch (e) {
+      if (!e.badcode) throw e;
+      opslag.set(CODE_KEY, null);
+      code = await vraagCode("De opgeslagen klascode klopt niet meer. Vul de nieuwe code in.");
+      if (!code) return { afgebroken: true };
+      return { data: await actie(code) };
+    }
+  }
+
+  /* ---------- Foto's ---------- */
+  const fotoVan = (r, n) => (r && r["foto" + n]) || "";
+  function shrink(file) {   // max. 1600 px, JPEG, onder ca. 600 kB
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file); const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let max = 1600, q = 0.82, out = "";
+        for (let i = 0; i < 6; i++) {
+          const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+          const c = document.createElement("canvas");
+          c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+          const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+          out = c.toDataURL("image/jpeg", q);
+          if (out.length < 800000) break;
+          max = Math.round(max * 0.8); q = Math.max(0.6, q - 0.06);
+        }
+        resolve(out);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("unreadable")); };
+      img.src = url;
+    });
+  }
+  async function uploadFoto(dataUrl) {
+    const blob = await (await fetch(dataUrl)).blob();
+    const naam = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2)) + ".jpg";
+    await api("/storage/v1/object/fotos/" + naam, { method: "POST", headers: { "Content-Type": "image/jpeg", "x-upsert": "false" }, body: blob });
+    return SUPABASE_URL.replace(/\/$/, "") + "/storage/v1/object/public/fotos/" + naam;
+  }
+
+  // Groot bekijken
+  let vList = [], vPos = 0, vName = "";
+  function showPhoto(r, n) {
+    vName = (r.naam || "Cursist") + (r.project ? " – " + r.project : "");
+    vList = VERSIES.filter(k => fotoVan(r, k)).map(k => ({ n: k, src: fotoVan(r, k) }));
+    vPos = Math.max(0, vList.findIndex(x => x.n === n));
+    vShow(); if (!$("viewer").open) $("viewer").showModal();
+  }
+  function vShow() {
+    const it = vList[vPos]; if (!it) return;
+    $("vImg").src = it.src; $("vImg").alt = "Versie " + it.n + " van " + vName;
+    $("vCap").textContent = "Versie " + it.n + " · " + vName;
+    const many = vList.length > 1; $("vPrev").hidden = !many; $("vNext").hidden = !many;
+  }
+  function vStep(d) { if (vList.length < 2) return; vPos = (vPos + d + vList.length) % vList.length; vShow(); }
+  $("vPrev").addEventListener("click", () => vStep(-1));
+  $("vNext").addEventListener("click", () => vStep(1));
+  $("viewer").addEventListener("keydown", e => { if (e.key === "ArrowLeft") vStep(-1); if (e.key === "ArrowRight") vStep(1); });
+  $("vClose").addEventListener("click", () => $("viewer").close());
+  $("viewer").addEventListener("click", e => { if (e.target === $("viewer")) $("viewer").close(); });
+  function photosEl(r) {
+    if (!VERSIES.some(n => fotoVan(r, n))) return null;
+    const wrap = document.createElement("div"); wrap.className = "shots";
+    const cap = (r.naam || "Cursist") + (r.project ? " – " + r.project : "");
+    VERSIES.forEach(n => {
+      const src = fotoVan(r, n);
+      if (!src) { const e = document.createElement("span"); e.className = "shot empty"; e.textContent = "versie " + n; wrap.appendChild(e); return; }
+      const b = document.createElement("button"); b.type = "button"; b.className = "shot";
+      b.setAttribute("aria-label", "Versie " + n + " van " + cap + " vergroten");
+      const img = document.createElement("img"); img.src = src; img.alt = ""; img.loading = "lazy"; b.appendChild(img);
+      const v = document.createElement("span"); v.className = "v"; v.textContent = "V" + n; b.appendChild(v);
+      b.addEventListener("click", e => { e.stopPropagation(); showPhoto(r, n); });
+      b.addEventListener("keydown", e => e.stopPropagation());
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
+  /* ---------- Weergave ---------- */
+  function ago(iso) {
+    if (!iso) return { t: "nog niet bijgewerkt", stale: false };
+    const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+    const t = d <= 0 ? "vandaag bijgewerkt" : d === 1 ? "gisteren bijgewerkt" : d + " dagen geleden bijgewerkt";
+    return { t, stale: d >= 14 };
+  }
+
+  // Fase-tabs (telefoon)
+  let gekozen = opslag.get("kitbash-fase");
+  if (!PHASES.some(p => p.id === gekozen)) gekozen = "bedenken";
+  const tabs = PHASES.map((p, i) => {
+    const t = document.createElement("button"); t.type = "button"; t.className = "tab " + p.cls;
+    t.setAttribute("role", "tab"); t.setAttribute("aria-controls", "fase-" + p.id); t.id = "tab-" + p.id;
+    const tn = document.createElement("span"); tn.className = "tn"; tn.textContent = "FASE " + p.code;
+    const ts = document.createElement("span"); ts.textContent = p.short;
+    const tc = document.createElement("span"); tc.className = "tc";
+    t.append(tn, ts, tc);
+    t.addEventListener("click", () => kies(p.id, true));
+    t.addEventListener("keydown", e => {
+      const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!d) return;
+      const n = PHASES[(i + d + PHASES.length) % PHASES.length]; kies(n.id, true); $("tab-" + n.id).focus();
+    });
+    $("tabs").appendChild(t);
+    return t;
+  });
+  function kies(id, door) {
+    gekozen = id;
+    tabs.forEach((t, i) => { const on = PHASES[i].id === id; t.setAttribute("aria-selected", on); t.tabIndex = on ? 0 : -1; });
+    document.querySelectorAll(".board .col").forEach(c => c.classList.toggle("off", c.dataset.phase !== id));
+    if (door) {
+      opslag.set("kitbash-fase", id);
+      const top = $("tabs").getBoundingClientRect().top + window.scrollY;
+      if (window.scrollY > top) window.scrollTo({ top: top - 8 });
+    }
+  }
+
+  function render() {
+    document.body.classList.toggle("alleen-lezen", !live);
+    $("addBtn").hidden = !live;
+    const counts = PHASES.map(p => rows.filter(r => faseVan(r) === p.id).length);
+    $("bar").innerHTML = "";
+    PHASES.forEach((p, i) => {
+      const s = document.createElement("span"); s.className = p.cls; s.style.background = "var(--c)"; s.style.flexGrow = counts[i];
+      $("bar").appendChild(s);
+    });
+    $("legend").innerHTML = "";
+    PHASES.forEach((p, i) => {
+      const el = document.createElement("span"); el.className = p.cls;
+      el.innerHTML = '<i class="dot" style="background:var(--c)"></i>';
+      el.append(p.code + " · " + p.title + " ");
+      const b = document.createElement("b"); b.textContent = counts[i] + "/" + rows.length; el.appendChild(b);
+      $("legend").appendChild(el);
+    });
+    tabs.forEach((t, i) => { t.querySelector(".tc").textContent = counts[i] === 1 ? "1 cursist" : counts[i] + " cursisten"; });
+
+    const board = $("board"); board.innerHTML = "";
+    PHASES.forEach((p, pi) => {
+      const sec = document.createElement("section"); sec.className = "col " + p.cls;
+      sec.dataset.phase = p.id; sec.id = "fase-" + p.id; sec.setAttribute("role", "tabpanel");
+      sec.innerHTML = '<div class="col-head"><span class="tag">' + p.code + '</span><div><h2></h2><div class="sub"></div></div><span class="count"></span></div>';
+      sec.querySelector("h2").textContent = p.title;
+      sec.querySelector(".sub").textContent = p.sub;
+      sec.querySelector(".count").textContent = counts[pi];
+      const ul = document.createElement("ul"); ul.className = "list"; ul.dataset.phase = p.id;
+      const mine = rows.filter(r => faseVan(r) === p.id).sort((a, b) => (a.nummer || 0) - (b.nummer || 0));
+      if (!mine.length) { const e = document.createElement("li"); e.className = "empty-col"; e.textContent = live ? "Sleep een cursist hierheen" : "Niemand in deze fase"; ul.appendChild(e); }
+      mine.forEach(r => ul.appendChild(card(r, pi)));
+      if (live) {
+        ul.addEventListener("dragover", e => { e.preventDefault(); ul.classList.add("over"); });
+        ul.addEventListener("dragleave", () => ul.classList.remove("over"));
+        ul.addEventListener("drop", e => { e.preventDefault(); ul.classList.remove("over"); const id = e.dataTransfer.getData("text/plain"); if (id) move(id, p.id); });
+      }
+      sec.appendChild(ul); board.appendChild(sec);
+    });
+    kies(gekozen, false);
+  }
+
+  function card(r, pi) {
+    const li = document.createElement("li");
+    li.className = "card"; li.dataset.id = r.id;
+    const a = ago(r.bijgewerkt);
+    li.innerHTML = '<span class="part"></span><div class="name"></div><div class="project"></div>' +
+      (r.notitie ? '<div class="note"></div>' : "") +
+      '<div class="meta"><span class="age"></span><span class="moves"><button class="mv" type="button" data-d="-1" aria-label="Naar vorige fase">←</button><button class="mv" type="button" data-d="1" aria-label="Naar volgende fase">→</button></span></div>';
+    li.querySelector(".part").textContent = String(r.nummer || "?").padStart(2, "0");
+    li.querySelector(".name").textContent = r.naam || "Naamloos";
+    li.querySelector(".project").textContent = r.project || "Nog geen project";
+    if (r.notitie) li.querySelector(".note").textContent = r.notitie;
+    const ph = photosEl(r); if (ph) li.insertBefore(ph, li.querySelector(".note") || li.querySelector(".meta"));
+    const ag = li.querySelector(".age"); ag.textContent = a.t; ag.classList.toggle("stale", live && a.stale);
+    if (live && a.stale) ag.title = "Al twee weken of langer niet bijgewerkt";
+    const [prev, next] = li.querySelectorAll(".mv");
+    prev.disabled = !live || pi === 0; next.disabled = !live || pi === PHASES.length - 1;
+    if (!live) { li.querySelector(".moves").hidden = true; return li; }
+    li.querySelectorAll(".mv").forEach(b => b.addEventListener("click", e => {
+      e.stopPropagation(); const n = PHASES[pi + Number(b.dataset.d)]; if (n) move(r.id, n.id);
+    }));
+    li.tabIndex = 0; li.draggable = true; li.title = "Klik om te bewerken";
+    li.addEventListener("dragstart", e => { e.dataTransfer.setData("text/plain", r.id); li.classList.add("dragging"); });
+    li.addEventListener("dragend", () => li.classList.remove("dragging"));
+    li.addEventListener("click", () => openEdit(r));
+    li.addEventListener("keydown", e => { if (e.key === "Enter") openEdit(r); });
+    return li;
+  }
+
+  /* ---------- Opslaan ---------- */
+  function foutmelding(e) {
+    if (e && e.status === 413) return "Een foto is te groot. Kies een kleinere foto.";
+    if (e && e.status >= 400 && e.status < 500) return "Opslaan werd geweigerd (" + (e.message || e.status) + ").";
+    return "Opslaan lukte niet. Controleer je internetverbinding en probeer het opnieuw.";
+  }
+  async function move(id, fase) {
+    const r = rows.find(x => x.id === id); if (!r || faseVan(r) === fase || !live) return;
+    try {
+      const res = await metCode(code => rpc("opslaan_cursist", { p_code: code, p_id: id, p_data: { fase } }));
+      if (res.afgebroken) return;
+      flash((r.naam || "Cursist") + " → " + PHASES[idx(fase)].title);
+      await laden(true);
+    } catch (e) { setStatus(foutmelding(e), true); }
+  }
+
+  // Bewerkvenster
+  const pick = $("fPhase");
+  PHASES.forEach(p => {
+    const l = document.createElement("label"); l.className = p.cls;
+    l.innerHTML = '<input type="radio" name="fase" value="' + p.id + '" id="fase-keuze-' + p.id + '"> ';
+    l.append(p.code + " · " + p.short);
+    pick.appendChild(l);
+  });
+  const HINT = "Voeg per stap een foto toe: versie 1, 2 en 3.";
+  function hint(t, err) { $("fFotoHint").textContent = t || HINT; $("fFotoHint").classList.toggle("err", !!err); }
+  const slotSrc = n => pending[n] !== undefined ? pending[n] : fotoVan(editing, n);
+  function buildSlots() {
+    const box = $("fSlots"); box.innerHTML = "";
+    VERSIES.forEach(n => {
+      const src = slotSrc(n);
+      const s = document.createElement("div"); s.className = "slot";
+      const t = document.createElement("span"); t.className = "slot-t"; t.textContent = "Versie " + n; s.appendChild(t);
+      const pv = document.createElement("div"); pv.className = "slot-prev";
+      if (src) { const i = document.createElement("img"); i.src = src; i.alt = "Versie " + n; pv.appendChild(i); } else pv.textContent = "Geen foto";
+      s.appendChild(pv);
+      const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; inp.id = "fFoto" + n;
+      const lab = document.createElement("label"); lab.className = "btn sm"; lab.htmlFor = inp.id; lab.textContent = src ? "Wijzigen" : "Toevoegen";
+      s.appendChild(lab); s.appendChild(inp);
+      inp.addEventListener("change", async () => {
+        const f = inp.files[0]; if (!f) return;
+        hint("Versie " + n + " verwerken…"); $("saveBtn").disabled = true;
+        try { pending[n] = await shrink(f); buildSlots(); hint("Versie " + n + " is klaar. Klik op Opslaan om hem te bewaren."); }
+        catch (e) { hint("Deze foto kon niet worden geopend. Kies een JPG- of PNG-bestand.", true); }
+        $("saveBtn").disabled = false;
+      });
+      if (src) {
+        const del = document.createElement("button"); del.type = "button"; del.className = "btn sm danger"; del.textContent = "Verwijderen";
+        del.setAttribute("aria-label", "Versie " + n + " verwijderen");
+        del.addEventListener("click", () => { pending[n] = ""; buildSlots(); hint("Versie " + n + " wordt verwijderd zodra je opslaat."); });
+        s.appendChild(del);
+      }
+      box.appendChild(s);
+    });
+  }
+  function openEdit(r) {
+    if (!live) return;
+    editing = r || null;
+    VERSIES.forEach(n => { delete pending[n]; }); buildSlots(); hint();
+    $("dlgTitle").textContent = r ? "Cursist bewerken" : "Cursist toevoegen";
+    $("fName").value = r ? r.naam || "" : "";
+    $("fProject").value = r ? r.project || "" : "";
+    $("fNote").value = r ? r.notitie || "" : "";
+    const f = r ? faseVan(r) : "bedenken";
+    pick.querySelectorAll("input").forEach(i => i.checked = i.value === f);
+    $("delBtn").hidden = !r; $("delBtn").classList.remove("armed"); $("delBtn").textContent = "Cursist verwijderen";
+    $("saveBtn").disabled = false; $("saveBtn").textContent = "Opslaan";
+    $("dlg").showModal(); $("fName").focus();
+  }
+  $("addBtn").addEventListener("click", () => openEdit(null));
+  $("cancelBtn").addEventListener("click", () => $("dlg").close());
+  $("delBtn").addEventListener("click", async () => {
+    const b = $("delBtn");
+    if (!b.classList.contains("armed")) { b.classList.add("armed"); b.textContent = "Zeker weten? Klik nogmaals"; return; }
+    const r = editing; if (!r) return;
+    b.disabled = true;
+    try {
+      const res = await metCode(code => rpc("verwijder_cursist", { p_code: code, p_id: r.id }));
+      if (!res.afgebroken) { $("dlg").close(); flash((r.naam || "Cursist") + " verwijderd"); await laden(true); }
+    } catch (e) { hint(foutmelding(e), true); }
+    b.disabled = false;
+  });
+  $("form").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!live) return;
+    const data = { naam: $("fName").value.trim(), project: $("fProject").value.trim(), notitie: $("fNote").value.trim(),
+                   fase: (pick.querySelector("input:checked") || {}).value || "bedenken" };
+    if (!data.naam) { $("fName").focus(); return; }
+    const r = editing;
+    $("saveBtn").disabled = true; $("saveBtn").textContent = "Opslaan…";
+    try {
+      const res = await metCode(async code => {
+        // Eerst de klascode controleren, dan pas foto's uploaden
+        if (!(await rpc("controleer_code", { p_code: code }))) { const err = new Error("klascode onjuist"); err.badcode = true; throw err; }
+        for (const n of VERSIES) {
+          if (pending[n] === undefined) continue;
+          if (pending[n] === "") { data["foto" + n] = ""; continue; }
+          if (/^https:\/\//.test(pending[n])) { data["foto" + n] = pending[n]; continue; }   // al geüpload bij een eerdere poging
+          hint("Versie " + n + " uploaden…");
+          data["foto" + n] = await uploadFoto(pending[n]);
+          pending[n] = data["foto" + n];
+        }
+        return rpc("opslaan_cursist", { p_code: code, p_id: r ? r.id : null, p_data: data });
+      });
+      if (res.afgebroken) { hint(); }
+      else { $("dlg").close(); flash(r ? "Opgeslagen" : data.naam + " toegevoegd"); await laden(true); }
+    } catch (err) { hint(foutmelding(err), true); }
+    $("saveBtn").disabled = false; $("saveBtn").textContent = "Opslaan";
+  });
+
+  laden();
+})();
+</script>
+</body>
+</html>
