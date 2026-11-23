@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "Kitbash bord",
+  "short_name": "Kitbash",
+  "description": "Overzicht van de kitbash-cursisten per fase: bedenken, samenstellen en afwerken.",
+  "lang": "nl",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#16856B",
+  "background_color": "#33634f",
+  "icons": [
+    { "src": "/app-iconen/icoon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app-iconen/icoon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/app-iconen/icoon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/app-iconen/icoon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
