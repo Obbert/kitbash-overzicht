@@ -4,6 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kitbash Overzicht</title>
+<!-- App-instellingen: maken de site installeerbaar als app "Kitbash bord" -->
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#16856B">
+<meta name="application-name" content="Kitbash bord">
+<meta name="apple-mobile-web-app-title" content="Kitbash bord">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="/app-iconen/icoon.svg" type="image/svg+xml">
+<link rel="icon" href="/app-iconen/icoon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/app-iconen/apple-touch-icon.png" sizes="180x180">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&family=Black+Ops+One&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -284,6 +295,30 @@ input, textarea, select { background: #fffdf6; border: 2px solid var(--ink); bor
 /* Bewerkbare Netlify-versie */
 body { margin: 0; }
 [hidden] { display: none !important; }
+
+/* Installatiemelding (alleen op telefoon en tablet, wegklikbaar) */
+.installtip {
+  position: fixed; z-index: 20; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  max-width: 460px; margin-inline: auto; display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: start;
+  padding: 18px 12px 14px 16px; color: var(--ink); border: 2px solid var(--ink); border-radius: 6px; box-shadow: var(--hard);
+  background: repeating-linear-gradient(-45deg, #16856B 0 10px, var(--ink) 10px 20px) top / 100% 6px no-repeat, var(--surface);
+  font: 400 14px/1.4 var(--f-body);
+}
+.installtip h2 { margin: 0; font: 700 17px/1.2 var(--f-display); text-transform: uppercase; letter-spacing: .03em; }
+.installtip p { margin: 2px 0 0; color: var(--muted); }
+.installtip .it-tekst { grid-column: 1; min-width: 0; }
+.installtip ol { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 3px; }
+.installtip ol li::marker { font: 600 13px var(--f-mono); color: #16856B; }
+.installtip b { font-weight: 700; }
+.installtip .it-deel { width: 16px; height: 16px; vertical-align: -3px; margin-inline: 2px; }
+.installtip .it-knoppen { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+.installtip .btn.primary { background: #16856B; color: #fff; }
+.installtip .it-sluit {
+  grid-column: 2; grid-row: 1; margin: -10px -4px 0 0; width: 44px; height: 44px; display: grid; place-items: center;
+  border: 0; background: none; color: var(--ink); font-size: 26px; line-height: 1; cursor: pointer; border-radius: 4px;
+}
+.installtip .it-sluit:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+body.met-installtip .wrap { padding-bottom: calc(48px + var(--installtip-h, 0px)); }
 img { max-width: 100%; }
 .header-btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
 .alleen-lezen .card { cursor: default; }
@@ -789,6 +824,105 @@ const RESERVE = [
   });
 
   laden();
+})();
+</script>
+
+<section class="installtip" id="installTip" aria-labelledby="installTitel" hidden>
+  <div class="it-tekst">
+    <h2 id="installTitel">Zet het bord op je beginscherm</h2>
+    <p>Dan open je Kitbash bord voortaan met één tik, als app.</p>
+    <div id="installStappen"></div>
+  </div>
+  <button class="it-sluit" type="button" id="installSluit" aria-label="Melding sluiten">×</button>
+</section>
+
+<script>
+/* Installatiemelding: alleen op telefoon of tablet, niet in de geïnstalleerde app, en niet meer na wegklikken. */
+(function () {
+  const SLEUTEL = "kitbash-installmelding";
+  const tip = document.getElementById("installTip");
+  const stappen = document.getElementById("installStappen");
+  const opslag = {
+    get() { try { return localStorage.getItem(SLEUTEL); } catch (e) { return null; } },
+    set(v) { try { localStorage.setItem(SLEUTEL, v); } catch (e) {} },
+  };
+  const ua = navigator.userAgent || "";
+  const isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/.test(ua);
+  const alsApp = () => navigator.standalone === true
+    || ["standalone", "fullscreen", "minimal-ui"].some(m => window.matchMedia("(display-mode: " + m + ")").matches);
+
+  let uitgesteld = null;   // het beforeinstallprompt-event van Android
+  let getoond = false;
+
+  const DEEL = '<svg class="it-deel" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M8 11H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-2"/></svg>';
+
+  function vulStappen() {
+    if (isIOS) {
+      stappen.innerHTML = '<ol><li>Open deze pagina in <b>Safari</b>.</li>'
+        + '<li>Tik op <b>Delen</b>' + DEEL + '</li>'
+        + '<li>Kies <b>Zet op beginscherm</b>.</li></ol>';
+    } else if (uitgesteld) {
+      stappen.innerHTML = '<div class="it-knoppen"><button class="btn primary" type="button" id="installKnop">Installeren</button>'
+        + '<button class="btn" type="button" id="installNietNu">Niet nu</button></div>';
+      document.getElementById("installKnop").addEventListener("click", installeer);
+      document.getElementById("installNietNu").addEventListener("click", sluit);
+    } else {
+      stappen.innerHTML = '<ol><li>Open in Chrome het menu <b aria-label="drie puntjes">⋮</b> rechtsboven.</li>'
+        + '<li>Kies <b>App installeren</b> of <b>Toevoegen aan startscherm</b>.</li></ol>';
+    }
+    meetHoogte();
+  }
+
+  function meetHoogte() {
+    if (!getoond) return;
+    document.documentElement.style.setProperty("--installtip-h", (tip.offsetHeight + 12) + "px");
+  }
+
+  function toon() {
+    if (getoond || alsApp() || opslag.get()) return;
+    getoond = true;
+    tip.hidden = false;
+    document.body.classList.add("met-installtip");
+    vulStappen();
+  }
+
+  function verberg() {
+    tip.hidden = true;
+    getoond = false;
+    document.body.classList.remove("met-installtip");
+  }
+
+  function sluit() { opslag.set("gesloten"); verberg(); }
+
+  async function installeer() {
+    const e = uitgesteld;
+    if (!e) return;
+    uitgesteld = null;
+    e.prompt();
+    try {
+      const keuze = await e.userChoice;
+      opslag.set(keuze && keuze.outcome === "accepted" ? "geinstalleerd" : "gesloten");
+    } catch (err) { opslag.set("gesloten"); }
+    verberg();
+  }
+
+  document.getElementById("installSluit").addEventListener("click", sluit);
+  tip.addEventListener("keydown", e => { if (e.key === "Escape") sluit(); });
+  window.addEventListener("resize", meetHoogte);
+
+  // Android/Chrome: eigen installatievenster gebruiken als de browser dat aanbiedt
+  window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    uitgesteld = e;
+    if (getoond) vulStappen();
+  });
+  window.addEventListener("appinstalled", () => { opslag.set("geinstalleerd"); verberg(); });
+
+  if ((isIOS || isAndroid) && !alsApp() && !opslag.get()) {
+    // Even wachten, zodat de pagina eerst rustig laadt en Android het installatie-event kan sturen
+    setTimeout(toon, 1500);
+  }
 })();
 </script>
 </body>
